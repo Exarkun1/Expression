@@ -25,39 +25,16 @@ public class ExpressionBuilder {
             Pair p = findStartBodyAndCommas(text);
             return buildExpressionByFunction(text, p.startPos, p.commas);
         } else {
-            int index = findOperator(text, '+', '-');
-            if(index != -1) {
-                Expression e1 = buildExpression(text.substring(0, index));
-                Expression e2 = buildExpression(text.substring(index+1));
-                if(text.charAt(index) == '+') {
-                    return new Sum(e1, e2);
-                } else {
-                    return new Sub(e1, e2);
-                }
-            }
-
-            index = findOperator(text, '*', '/');
-            if(index != -1) {
-                Expression e1 = buildExpression(text.substring(0, index));
-                Expression e2 = buildExpression(text.substring(index+1));
-                if(text.charAt(index) == '*') {
-                    return new Prod(e1, e2);
-                } else {
-                    return new Div(e1, e2);
-                }
-            }
-
-            index = findOperator(text, '^');
-            if(index != -1) {
-                Expression e1 = buildExpression(text.substring(0, index));
-                Expression e2 = buildExpression(text.substring(index+1));
-                return new Pow(e1, e2);
-            }
+            Expression e = buildSumOrSub(text);
+            if(e == null) e = buildProdOrDiv(text);
+            if(e == null) e = buildPow(text);
+            if(e != null) return e;
         }
         throw new RuntimeException("buildExpression");
     }
 
     private String removeExternalBrackets(String text) {
+        if(text.isEmpty()) return text;
         while (text.charAt(0) == '(' && text.charAt(text.length()-1) == ')') {
             String tempText = text.substring(1, text.length()-1);
             if(!checkSequenceBrackets(tempText)) {
@@ -100,7 +77,7 @@ public class ExpressionBuilder {
     }
 
     private boolean isCount(String text) {
-        return text.matches("[0-9]+(\\.[0-9]+)?");
+        return text.matches("[0-9]+((\\.)|(\\.[0-9]+))?");
     }
 
     private int findOperator(String text, char... operators) {
@@ -161,6 +138,44 @@ public class ExpressionBuilder {
         }
         m.put(vs[i], buildExpression(text.substring(prevIndex, text.length()-1)));
         return f.expression().apply(m);
+    }
+
+    private Expression buildSumOrSub(String text) {
+        int index = findOperator(text, '+', '-');
+        if(index != -1) {
+            Expression e1 = buildExpression(text.substring(0, index));
+            Expression e2 = buildExpression(text.substring(index+1));
+            if(text.charAt(index) == '+') {
+                return new Sum(e1, e2);
+            } else {
+                return new Sub(e1, e2);
+            }
+        }
+        return null;
+    }
+
+    private Expression buildProdOrDiv(String text) {
+        int index = findOperator(text, '*', '/');
+        if(index != -1) {
+            Expression e1 = buildExpression(text.substring(0, index));
+            Expression e2 = buildExpression(text.substring(index+1));
+            if(text.charAt(index) == '*') {
+                return new Prod(e1, e2);
+            } else {
+                return new Div(e1, e2);
+            }
+        }
+        return null;
+    }
+
+    private Expression buildPow(String text) {
+        int index = findOperator(text, '^');
+        if(index != -1) {
+            Expression e1 = buildExpression(text.substring(0, index));
+            Expression e2 = buildExpression(text.substring(index+1));
+            return new Pow(e1, e2);
+        }
+        return null;
     }
 
     private final FunctionContext functionContext;

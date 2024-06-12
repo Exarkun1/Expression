@@ -23,6 +23,34 @@ public class Function {
         return e.directValue(m);
     }
 
+    public double value(Variable[] vs, double[] ds) {
+        Map<Variable, Double> m = new HashMap<>();
+        for(int i = 0; i < vs.length; i++) {
+            m.put(vs[i], ds[i]);
+        }
+        return value(m);
+    }
+
+    public double value(double... ds) {
+        return value(e.variables(), ds);
+    }
+
+    public double valueByName(Map<String, Double> m) {
+        Map<Variable, Double> mv = new HashMap<>();
+        for(var v : m.entrySet()) {
+            mv.put(new Variable(v.getKey()), v.getValue());
+        }
+        return value(mv);
+    }
+
+    public double valueByName(String[] vs, double[] ds) {
+        Map<String, Double> m = new HashMap<>();
+        for(int i = 0; i < vs.length; i++) {
+            m.put(vs[i], ds[i]);
+        }
+        return valueByName(m);
+    }
+
     public Expression expression() {
         return e;
     }

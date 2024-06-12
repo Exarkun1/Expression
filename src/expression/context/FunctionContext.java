@@ -7,6 +7,7 @@ import expression.basic.Cos;
 import expression.basic.Neg;
 import expression.basic.Sin;
 import expression.basic.Tan;
+import expression.combination.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class FunctionContext {
         functionTable.put("sin", new Function("sin", new Sin(getVariable("x"))));
         functionTable.put("cos", new Function("cos", new Cos(getVariable("x"))));
         functionTable.put("tan", new Function("tan", new Tan(getVariable("x"))));
+        functionTable.put("log", new Function("log", new Log(getVariable("x"), getVariable("y"))));
     }
 
     public void putFunction(Function f) {
@@ -80,6 +82,9 @@ public class FunctionContext {
     }
 
     public Expression of(String expression) {
+        if(!expressionAnalyser.analyseExpression(expression)) {
+            throw new RuntimeException("of (analyseExpression)");
+        }
         return expressionBuilder.buildExpression(expression);
     }
 
@@ -96,7 +101,8 @@ public class FunctionContext {
 
     private final Map<String, Function> functionTable = new HashMap<>();
     private final Map<String, Variable> variableTable = new HashMap<>();
+    private final ExpressionAnalyser expressionAnalyser = new ExpressionAnalyser();
     private final ExpressionBuilder expressionBuilder = new ExpressionBuilder(this);
-    private final Set<String> basicFunctionNames = Set.of("neg", "sin", "cos", "tan");
+    private final Set<String> basicFunctionNames = Set.of("neg", "sin", "cos", "tan", "log");
     private final Set<String> basicVariableNames = Set.of("x", "y", "z");
 }

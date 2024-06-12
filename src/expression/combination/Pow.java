@@ -28,10 +28,14 @@ public class Pow extends Combination {
 
     @Override
     public Expression diff(Variable v) {
-        if(e2 instanceof Constant c) {
-            return new Prod(c, new Pow(e1, new Constant(c.value()-1)));
-        } else if (e2 instanceof Variable v1 && !v.equals(v1)) {
-            return new Prod(v1, new Pow(e1, new Sub(v1, new Constant(1))));
+        if(e2 instanceof Constant c2) {
+            return new Prod(new Prod(c2, new Pow(e1, new Constant(c2.value()-1))), e1.diff(v));
+        } else if (e2 instanceof Variable v2 && !v.equals(v2)) {
+            return new Prod(new Prod(v2, new Pow(e1, new Sub(v2, new Constant(1)))), e1.diff(v));
+        } else if(e1 instanceof Constant c1) {
+            return new Prod(new Prod(this, new Constant(Math.log(c1.value()) / Math.log(Math.E))), e2.diff(v));
+        } else if (e1 instanceof Variable v1 && !v.equals(v1)) {
+            return new Prod(new Prod(this, new Log(new Constant(Math.E), v1)), e2.diff(v));
         } else throw new RuntimeException("diff");
     }
 
